@@ -3,7 +3,6 @@ const mysql = require('mysql');
 const bodyparser = require('body-parser');
 
 const app = express();
-// const lis = express();
 const port = 3000;
 app.use(bodyparser.json());
 
@@ -12,7 +11,7 @@ app.get('/' ,(req, res) => res.send('Hello World!'));
 const db = mysql.createConnection({
     host : 'localhost',
     user : 'root',
-    password : 'root1106',
+    password : 'root',
     database : 'employee',
     multipleStatements : true,
 });
@@ -61,8 +60,6 @@ app.get('/createtable',(req, res) => {
 
 //get all employees
 app.get('/employees',(req, res) => {
-    console.log(2);
-    // res.send("hello world")
     let sql = "SELECT * FROM employee";
     db.query(sql, (err, results) => {
         if(!err){
@@ -87,7 +84,7 @@ app.get('/employees/:id',(req, res) => {
 });
 
 //delete employee
-app.delete('/employee/:id',(req, res) => {
+app.delete('/employees/:id',(req, res) => {
     let sql = `DELETE FROM employee WHERE EmpId = ${req.params.id}`;
     db.query(sql, (err, rows, fields) => {
         if(!err)
@@ -100,11 +97,13 @@ app.delete('/employee/:id',(req, res) => {
 //insert into employee
 app.post('/employees',(req, res) => {
     let emp = req.body;
-    let sql = 'SET @EmpName = ?;SET @EmpCode = ?; \
-    CALL employeeAddOrEdit(@EmpName,@EmpCode);';
-    db.query(sql, [emp.EmpName, emp.EmpCode], (err, result) => {
-        if(!err)
+    let value =[emp.id, emp.name, emp.code];
+    let sql = `INSERT INTO employee (EmpId, EmpName, EmpCode) VALUES (?)`;
+    db.query(sql, [value], (err, result) => {
+        if(!err){
             res.send('Added successfully');
+            console.log(result)
+        }    
         else
             console.log(err);
     });
@@ -113,15 +112,17 @@ app.post('/employees',(req, res) => {
 //update employee
 app.put('/employees',(req, res) => {
     let emp = req.body;
-    let sql = 'SET @EmpId= ?;SET @EmpName = ?;SET @EmpCode = ?; \
-    CALL employeeAddOrEdit(@EmpId,@EmpName,@EmpCode);';
-    db.query(sql, [emp.EmpId, emp.EmpName, emp.EmpCode], (err, result) => {
-        if(!err)
+    let value =[emp.id, emp.name, emp.code];
+    let sql = `UPDATE employee SET EmpName = ? WHERE EmpId = ?`;
+    db.query(sql, [ emp.name, emp.id], (err, result) => {
+        if(!err){
             res.send('Updated successfully');
+            console.log(result);
+        }    
         else
             console.log(err);
     });
 });
 
-app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
+app.listen(port, () => console.log(`App listening at http://localhost:${port}`))
 
