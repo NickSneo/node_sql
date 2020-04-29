@@ -3,12 +3,16 @@ const mysql = require('mysql');
 const bodyparser = require('body-parser');
 
 const app = express();
-app.use(bodyparser.json)
+// const lis = express();
+const port = 3000;
+app.use(bodyparser.json());
+
+app.get('/' ,(req, res) => res.send('Hello World!'));
 
 const db = mysql.createConnection({
     host : 'localhost',
-    user : 'nick',
-    password : 'root',
+    user : 'root',
+    password : 'root1106',
     database : 'employee',
     multipleStatements : true,
 });
@@ -18,14 +22,15 @@ db.connect((err) => {
     if(err){
         console.log('DB connectoin failed\nError : '+ JSON.stringify(err));
     }
-    console.log('MySQL connected');
+    else
+        console.log('MySQL connected');
 });
 
-
-app.listen('3000', () => {
-    console.log('Server started on port 3000');
+// test to check if connected
+db.query('SELECT * FROM employee', (error, results, fields) => {
+    if (error) throw error;
+    console.log('The solution is: ', results);
 });
-
 
 //create db
 app.get('/createdb',(req,res) => {
@@ -46,22 +51,29 @@ app.get('/createtable',(req, res) => {
     db.query(sql, (err, result) => {
         if(err){
             console.log('Table creation failed\nError : '+ JSON.stringify(err));
-        }v
-        console.log(result);
-        res.send('POST Table created')
+        }
+        else{
+            console.log(result);
+            res.send('POST Table created')
+        }    
     });
 });
 
 //get all employees
 app.get('/employees',(req, res) => {
-    let sql = 'SELECT * FROM employee';
-    db.query(sql, (err, rows, fields) => {
-        if(!err)
-            res.send(rows);
+    console.log(2);
+    // res.send("hello world")
+    let sql = "SELECT * FROM employee";
+    db.query(sql, (err, results) => {
+        if(!err){
+            res.send(results);
+            console.log(results)
+        }    
         else
-            console.log(err);
+            console.log(err);   
     });
 });
+
 
 //select single post
 app.get('/employees/:id',(req, res) => {
@@ -111,4 +123,5 @@ app.put('/employees',(req, res) => {
     });
 });
 
+app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
 
